@@ -17,6 +17,7 @@ class CountdownScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final controller = context.watch<CountdownController>();
 
+    // ⏱ timeout 감지 → 한 번만 실행
     if (controller.isFinished) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         onTimeout();

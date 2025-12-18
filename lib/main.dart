@@ -4,10 +4,13 @@ import 'package:provider/provider.dart';
 import 'controllers/fall_controller.dart';
 import 'services/sensor_service.dart';
 import 'services/tflite_service.dart';
+import 'services/device_service.dart';
 import 'screens/root_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  await DeviceService().init(); // ⭐ 최초 1회
 
   final sensor = SensorService();
   final tflite = TFLiteService();

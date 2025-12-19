@@ -4,7 +4,6 @@ import 'package:sensors_plus/sensors_plus.dart';
 class SensorData {
   final double ax, ay, az;
   final double gx, gy, gz;
-  final int timestamp;
 
   SensorData({
     required this.ax,
@@ -13,11 +12,18 @@ class SensorData {
     required this.gx,
     required this.gy,
     required this.gz,
-    required this.timestamp,
   });
+
+  List<double> toInputVector() => [ax, ay, az, gx, gy, gz];
 }
 
 class SensorService {
+  /// ===============================
+  /// Configuration
+  /// ===============================
+  static const int hz = 64; // 64Hz
+  static const Duration interval = Duration(milliseconds: 1000 ~/ hz);
+
   AccelerometerEvent? _lastAccel;
   GyroscopeEvent? _lastGyro;
 
@@ -25,28 +31,32 @@ class SensorService {
 
   Stream<SensorData> get sensorStream => _controller.stream;
 
+  Timer? _timer;
+
   void start() {
-    accelerometerEvents.listen((event) {
-      _lastAccel = event;
-      _emit();
+    accelerometerEvents.listen((e) => _lastAccel = e);
+    gyroscopeEvents.listen((e) => _lastGyro = e);
+
+    _timer = Timer.periodic(interval, (_) {
+      if (_lastAccel != null && _lastGyro != null) {
+        _controller.add(
+          SensorData(
+            ax: _lastAccel?.x ?? 0,
+            ay: _lastAccel?.y ?? 0,
+            az: _lastAccel?.z ?? 0,
+            gx: _lastGyro?.x ?? 0,
+            gy: _lastGyro?.y ?? 0,
+            gz: _lastGyro?.z ?? 0,
+          )
+        );
+      }
     });
 
-    gyroscopeEvents.listen((event) {
-      _lastGyro = event;
-      _emit();
-    });
   }
 
-  void _emit() {
-    _controller.add(SensorData(
-        ax: _lastAccel?.x ?? 0,
-        ay: _lastAccel?.y ?? 0,
-        az: _lastAccel?.z ?? 0,
-        gx: _lastGyro?.x ?? 0,
-        gy: _lastGyro?.y ?? 0,
-        gz: _lastGyro?.z ?? 0,
-        timestamp: DateTime.now().millisecondsSinceEpoch,
-      ));
+  void dispose() {
+    _timer?.cancel();
+    _timer = null;
   }
 
 }

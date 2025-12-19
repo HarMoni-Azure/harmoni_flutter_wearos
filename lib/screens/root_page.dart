@@ -28,17 +28,9 @@ class RootPage extends StatelessWidget {
           },
           child: CountdownScreen(
             onCancel: () async {
-              final data = controller.lastSensorData;
-              if (data != null) {
-                await AzureService.sendEvent("user_canceled", data);
-              }
               controller.cancelCountdown();
             },
             onTimeout: () async {
-              final data = controller.lastSensorData;
-              if (data != null) {
-                await AzureService.sendEvent("no_response", data);
-              }
               controller.autoReport();
             },
           ),

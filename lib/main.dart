@@ -14,7 +14,14 @@ void main() async {
 
   final sensor = SensorService();
   final tflite = TFLiteService();
-  await tflite.init();
+  
+  try{
+    await tflite.init();
+    print('TFLite init success');
+  } catch(e, s){
+    print('TFLite init failed: $e');
+    print(s);
+  }
 
   runApp(MyApp(sensor: sensor, tflite: tflite));
 }

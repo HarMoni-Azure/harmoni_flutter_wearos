@@ -20,11 +20,11 @@ class TFLiteService {
       throw Exception('Model not loaded');
     }
 
-    // TFLite inference (input shape: [1, 384])
-    assert(input.length == 384);
+    // TFLite inference (input shape: [1, windowSize*6])
+    assert(input.length == 768);
 
     final inputTensor = Float32List.fromList(input);
-    final inputShaped = [inputTensor]; // Shape: [1, 384]
+    final inputShaped = [inputTensor]; // Shape: [1, 768]
 
     final output = List.generate(1, (_) => List.filled(1, 0.0)); // Shape: [1, 1]
 

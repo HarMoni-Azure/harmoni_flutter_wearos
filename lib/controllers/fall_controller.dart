@@ -73,7 +73,7 @@ class FallController extends ChangeNotifier {
         input.addAll(s.toInputVector()); // ax ay az gx gy gz
       }
 
-      // length == 384 보장
+      // length == windowSize * 6 보장
       final score = tflite.predict(input);
       
       if (score >= FALL_THRESHOLD) {

@@ -14,7 +14,7 @@ class AzureService {
 
     await http.post(
       Uri.parse(_url),
-      headers: {'Content-Type': 'application/json'},
+      headers: {'Content-Type': 'application/json', 'x-functions-key': String.fromEnvironment('API_FUNCTION_KEY')},
       body: jsonEncode({
         'timestamp': DateTime.now().toIso8601String(),
         'type': type,

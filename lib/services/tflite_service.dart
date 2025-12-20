@@ -7,7 +7,7 @@ class TFLiteService {
  
   Future<void> init() async {
     _interpreter = await Interpreter.fromAsset(
-      'assets/models/latest_model_v2.tflite',
+      'assets/models/latest_model_v4.tflite',
       options: InterpreterOptions()
         ..threads = 1
         ..useNnApiForAndroid = false,

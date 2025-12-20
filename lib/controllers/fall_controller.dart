@@ -18,7 +18,7 @@ class FallController extends ChangeNotifier {
   /// Configuration
   /// ===============================
   static const double FALL_THRESHOLD = 0.3;
-  static const int windowSize = 64; // 1초 @ 64Hz
+  static const int windowSize = 128; // 1초 @ 128Hz
 
   final SensorService sensor;
   final TFLiteService tflite;

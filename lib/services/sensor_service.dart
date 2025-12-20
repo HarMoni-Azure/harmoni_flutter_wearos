@@ -21,7 +21,7 @@ class SensorService {
   /// ===============================
   /// Configuration
   /// ===============================
-  static const int hz = 64; // 64Hz
+  static const int hz = 128; // 128Hz
   static const Duration interval = Duration(milliseconds: 1000 ~/ hz);
 
   AccelerometerEvent? _lastAccel;

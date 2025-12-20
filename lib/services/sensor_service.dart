@@ -1,9 +1,11 @@
 import 'dart:async';
+import 'package:flutter/services.dart';
 import 'package:sensors_plus/sensors_plus.dart';
 
 class SensorData {
   final double ax, ay, az;
   final double gx, gy, gz;
+  final double? heartRate;
 
   SensorData({
     required this.ax,
@@ -12,9 +14,20 @@ class SensorData {
     required this.gx,
     required this.gy,
     required this.gz,
+    this.heartRate,
   });
 
   List<double> toInputVector() => [ax, ay, az, gx, gy, gz];
+
+  Map<String, dynamic> toJson() => {
+    'ax': ax,
+    'ay': ay,
+    'az': az,
+    'gx': gx,
+    'gy': gy,
+    'gz': gz,
+    'heartRate': heartRate,
+  };
 }
 
 class SensorService {
@@ -33,9 +46,18 @@ class SensorService {
 
   Timer? _timer;
 
+  static const _hrChannel = EventChannel('harmoni/heart_rate_stream');
+  double? _latestHeartRate;
+  StreamSubscription? _hrSubscription;
+
   void start() {
     accelerometerEvents.listen((e) => _lastAccel = e);
     gyroscopeEvents.listen((e) => _lastGyro = e);
+    _hrSubscription = _hrChannel.receiveBroadcastStream().listen(
+      (hr) {
+        _latestHeartRate = (hr as num).toDouble();
+      },
+    );
 
     _timer = Timer.periodic(interval, (_) {
       if (_lastAccel != null && _lastGyro != null) {
@@ -47,6 +69,7 @@ class SensorService {
             gx: _lastGyro?.x ?? 0,
             gy: _lastGyro?.y ?? 0,
             gz: _lastGyro?.z ?? 0,
+            heartRate: _latestHeartRate,
           )
         );
       }
@@ -57,6 +80,8 @@ class SensorService {
   void dispose() {
     _timer?.cancel();
     _timer = null;
+    _hrSubscription?.cancel();
+    _controller.close();
   }
 
 }

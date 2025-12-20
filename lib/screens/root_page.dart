@@ -6,10 +6,24 @@ import '../controllers/countdown_controller.dart';
 import '../screens/countdown_screen.dart';
 import '../screens/monitoring_screen.dart';
 import '../screens/auto_reported_screen.dart';
-import '../services/azure_service.dart';
 
-class RootPage extends StatelessWidget {
+class RootPage extends StatefulWidget {
   const RootPage({super.key});
+
+  @override
+  State<RootPage> createState() => _RootPageState();
+}
+
+class _RootPageState extends State<RootPage> {
+  @override
+  void initState() {
+    super.initState();
+
+    // ✅ UI 트리 완성 후 센서 + 추론 시작
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<FallController>().start();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {

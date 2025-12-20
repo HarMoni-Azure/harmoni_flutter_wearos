@@ -4,7 +4,8 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
 
     <!-- 센서 -->
-    <!-- <uses-permission android:name="android.permission.BODY_SENSORS"/> -->
+    <uses-permission android:name="android.permission.BODY_SENSORS" />
+    <!-- <uses-permission android:name="android.permission.ACTIVITY_RECOGNITION" /> -->
 
     <!-- Wear OS 진동 -->
     <uses-permission android:name="android.permission.VIBRATE"/>
@@ -17,6 +18,11 @@
 
     <!-- (선택) 부팅 후 자동 시작 -->
     <!-- <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/> -->
+
+    <!-- Wear OS 전용 -->
+    <uses-feature
+        android:name="android.hardware.type.watch"
+        android:required="true" />
 
     <application
         android:label="HarMoni"

@@ -26,6 +26,7 @@ class FallController extends ChangeNotifier {
   StreamSubscription? _subscription;
 
   AppPhase phase = AppPhase.monitoring;
+  bool _started = false;
   bool processing = false;
 
   /// 마지막으로 감지를 무시해야 하는 시각
@@ -41,11 +42,15 @@ class FallController extends ChangeNotifier {
 
   List<double>? _lastInferenceWindow;
 
-  FallController(this.sensor, this.tflite) {
-    start();
-  }
+  FallController(this.sensor, this.tflite);
 
+  /// ===============================
+  /// Start sensing & inference
+  /// ===============================
   void start() {
+    if (_started) return;
+    _started = true;
+    
     sensor.start();
 
     _subscription ??= sensor.sensorStream.listen((data) {

@@ -9,7 +9,7 @@ class AzureService {
 
   static Future<void> sendEvent(
     String type,
-    List<double> data,
+    List<Map<String, dynamic>> sensorData,
   ) async {
     final device = DeviceService();
 
@@ -19,7 +19,7 @@ class AzureService {
       body: jsonEncode({
         'timestamp': DateTime.now().toIso8601String(),
         'type': type,
-        'sensor': data,
+        'sensor': sensorData,
         'device': device.toJson(),
       }),
     );

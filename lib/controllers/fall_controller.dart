@@ -40,7 +40,7 @@ class FallController extends ChangeNotifier {
 
   final Queue<SensorData> _buffer = Queue();
 
-  List<double>? _lastInferenceWindow;
+  List<Map<String, dynamic>> _lastInferenceWindow = [];
 
   FallController(this.sensor, this.tflite);
 
@@ -76,14 +76,14 @@ class FallController extends ChangeNotifier {
       final input = <double>[];
       for (final s in _buffer) {
         input.addAll(s.toInputVector()); // ax ay az gx gy gz
+        // 🔑 스냅샷 저장
+        _lastInferenceWindow.add(s.toJson());
       }
 
       // length == windowSize * 6 보장
       final score = tflite.predict(input);
       
       if (score >= FALL_THRESHOLD) {
-        // 🔑 스냅샷 저장
-        _lastInferenceWindow = List<double>.from(input);
         processing = true;
         _sendSensorData("fall_detected");
         phase = AppPhase.countdown;
@@ -93,15 +93,15 @@ class FallController extends ChangeNotifier {
   }
 
   void _sendSensorData(String type) {
-    if (_lastInferenceWindow == null) return;
+    if (_lastInferenceWindow.isEmpty) return;
 
-    AzureService.sendEvent(type, _lastInferenceWindow!);
+    AzureService.sendEvent(type, _lastInferenceWindow);
   }
 
   void cancelCountdown() {
     processing = false;
     _buffer.clear();
-    _lastInferenceWindow = null;
+    _lastInferenceWindow = [];
     phase = AppPhase.monitoring;
 
     // ⭐ 지금 시점부터 쿨다운 시작
@@ -117,6 +117,17 @@ class FallController extends ChangeNotifier {
     phase = AppPhase.autoReported;
 
     _sendSensorData("auto_reported");
+
+    notifyListeners();
+  }
+
+  /// 자동 신고 → 감지 화면
+  void reset() {
+    processing = false;
+    phase = AppPhase.monitoring;
+    
+    _buffer.clear();
+    _lastInferenceWindow = [];
 
     notifyListeners();
   }

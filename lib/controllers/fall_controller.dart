@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart';
 import '../services/sensor_service.dart';
 import '../services/tflite_service.dart';
 import '../services/azure_service.dart';
+import '../services/report_service.dart';
 
 enum AppPhase {
   monitoring,
@@ -17,7 +18,7 @@ class FallController extends ChangeNotifier {
   /// ===============================
   /// Configuration
   /// ===============================
-  static const double FALL_THRESHOLD = 0.3;
+  static const double FALL_THRESHOLD = 0.7;
   static const int windowSize = 128; // 1초 @ 128Hz
 
   final SensorService sensor;
@@ -75,7 +76,7 @@ class FallController extends ChangeNotifier {
 
       final input = <double>[];
       for (final s in _buffer) {
-        input.addAll(s.toInputVector()); // ax ay az gx gy gz
+        input.addAll(s.toInputVector()); // ax ay az gx gy gz svm
         // 🔑 스냅샷 저장
         _lastInferenceWindow.add(s.toJson());
       }
@@ -85,17 +86,29 @@ class FallController extends ChangeNotifier {
       
       if (score >= FALL_THRESHOLD) {
         processing = true;
-        _sendSensorData("fall_detected");
         phase = AppPhase.countdown;
         notifyListeners();
       }
     });
   }
 
-  void _sendSensorData(String type) {
+  Future<void> _sendSensorData(String type) async {
     if (_lastInferenceWindow.isEmpty) return;
 
-    AzureService.sendEvent(type, _lastInferenceWindow);
+    final res = await AzureService.sendEvent(type, _lastInferenceWindow);
+
+    try{
+      if (type == "auto_reported" && res.statusCode == 201) {
+        ReportService.sendWebhookEvent(type);
+        ReportService.sendSignalREvent(type);
+      }
+    } catch (e) {
+      print('AzureService.sendEvent error: $e');
+    } finally {
+      // 전송 후 버퍼 및 스냅샷 초기화
+      _lastInferenceWindow = [];
+      _buffer.clear();
+    }
   }
 
   void cancelCountdown() {

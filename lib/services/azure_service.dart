@@ -1,19 +1,18 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'sensor_service.dart';
 import 'device_service.dart';
 
 class AzureService {
   static const String _url = String.fromEnvironment('API_BASE_URL');
   static const String _api_key = String.fromEnvironment('API_FUNCTION_KEY');
 
-  static Future<void> sendEvent(
+  static Future<http.Response> sendEvent(
     String type,
     List<Map<String, dynamic>> sensorData,
   ) async {
     final device = DeviceService();
 
-    await http.post(
+    final response = await http.post(
       Uri.parse(_url),
       headers: {'Content-Type': 'application/json', 'x-functions-key': _api_key},
       body: jsonEncode({
@@ -23,5 +22,7 @@ class AzureService {
         'device': device.toJson(),
       }),
     );
+
+    return response;
   }
 }
